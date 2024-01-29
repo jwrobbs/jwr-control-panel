@@ -13,18 +13,9 @@
 
 namespace JWR\ControlPanel;
 
-use function JWR\JWR_Control_Panel\PHP\create_jwr_control_panel;
-use function JWR\JWR_Control_Panel\PHP\field_group_exists;
 use function JWR\JWR_Control_Panel\PHP\options_page_exists;
 
 defined( 'ABSPATH' ) || die();
-
-/*
-	[x] set local json
-	[] check for page function and set
-	[] check for fields group and set
-	[] read json, create basic function, and set framework
-*/
 
 // Return if Advanced Custom Fields is not installed.
 if ( ! function_exists( 'is_plugin_active' ) ) {
@@ -81,10 +72,6 @@ function create_options_page() {
 }
 add_action( 'acf/init', __NAMESPACE__ . '\create_options_page', 8 );
 
-// If json file missing, add it.
-// ?? Should I hook this to something?
-
-
 /**
  * Update JWR Control Panel.
  *
@@ -97,32 +84,7 @@ function update_jwr_control_panel() {
 		$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
 	}
 
-	$json  = $wp_filesystem->get_contents( __DIR__ . '/acf-json/group_jwr_control_panel.json' );
-	$array = json_decode( $json, true );
-
-	$array = apply_filters( 'jwr_control_panel_update', $array );
-	$dump  = \var_export( $array, true );
-	\update_field( 'field_65b7c94a8f5af', 'In hook: ' . $dump, 'option' );
-
-	$json = json_encode( $array );
-	file_put_contents( __DIR__ . '/acf-json/group_jwr_control_panel.json', $json );
+	require_once 'php/class-acf-fields.php';
+	do_action( 'update_jwr_control_panel' );
 }
 add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );
-
-/**
- * Hook pass through.
- * This does NOTHING - only ensures that the array is passed when there are no other hooks.
- * ?? Is there a better way to do this?
- *
- * @param array $data The array to be updated.
- * @return array
- */
-function hook_test( array $data ) {
-	// $dump = \var_export( $data, true );
-	\ob_start();
-	\var_dump( $data );
-	$dump = \ob_get_clean();
-	\update_field( 'field_65b7c94a8f5af', 'In hook: ' . $dump, 'option' );
-	return $data;
-}
-add_action( 'jwr_control_panel_update', __NAMESPACE__ . '\hook_test', 1, 1 );

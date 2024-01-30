@@ -3,7 +3,7 @@ Control Panel is a system I am using to create a shared control/options panel fo
 
 ***Note** This system requires ACF Pro.*
 
-Status: <span style="color: orange; font-weight: bold;">in development</span>
+Status: $${\color{orange}In Development}$$
 
 ## To Do/Wishlist
 **To Do**

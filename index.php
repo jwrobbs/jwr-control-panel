@@ -13,28 +13,20 @@
 
 namespace JWR\ControlPanel;
 
+use function JWR\JWR_Control_Panel\PHP\options_page_exists;
+
 defined( 'ABSPATH' ) || die();
 
 // Return if Advanced Custom Fields is not installed.
-if ( ! function_exists( 'get_fields' ) ) {
+if ( ! function_exists( 'is_plugin_active' ) ) {
+	include_once ABSPATH . 'wp-admin/includes/plugin.php';
+}
+if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) || \function_exists( 'set_acf_json_save_point' ) ) {
 	return;
 }
 
-if ( ! \function_exists( __NAMESPACE__ . '\init' ) ) {
-	/**
-	 * Initialize the plugin.
-	 *
-	 * @return void
-	 */
-	function init() {
-		/*
-			[x] set local json
-			[] check for fields group and set
-			[] check for page function and set
-			[] read json, create basic function, and set framework
-		*/
-	}
-}
+require_once 'php/field-group-fns.php';
+require_once 'php/class-jwr-plugin-options.php';
 
 /**
  * Set the path for the ACF JSON files.
@@ -45,52 +37,56 @@ if ( ! \function_exists( __NAMESPACE__ . '\init' ) ) {
 function set_acf_json_save_point( $path ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 	return __DIR__ . '/acf-json';
 }
-add_filter( 'acf/settings/save_json', 'set_acf_json_save_point' );
+add_filter( 'acf/settings/save_json', __NAMESPACE__ . '\set_acf_json_save_point' );
 
 /**
- * Check if ACF field group exists.
+ * Set load path for ACF JSON files.
  *
- * @param string $field_group_name The name of the field group.
+ * @param array $paths The paths to the ACF JSON files.
+ * @return array
  */
-function field_group_exists( $field_group_name ) {
-	$groups = \acf_get_field_groups();
-	foreach ( $groups as $group ) {
-		if ( $group['title'] === $field_group_name ) {
-			return true;
-		}
-		return false;
-	}
+function set_acf_json_load_point( $paths ) {
+	unset( $paths[0] );
+	$paths[] = __DIR__ . '/acf-json';
+	return $paths;
 }
+add_filter( 'acf/settings/load_json', __NAMESPACE__ . '\set_acf_json_load_point' );
+
 
 /**
- * Add control panel field group if it doesn't exist.
+ * Create options page if needed.
  *
  * @return void
  */
-function add_control_panel_field_group() {
-	if ( ! field_group_exists( 'jwr-control-panel' ) ) {
-		acf_add_local_field_group(
+function create_options_page() {
+	if ( ! options_page_exists( 'JWR Control Panel' ) ) {
+		\acf_add_options_page(
 			array(
-				'key'                   => 'group_5e2f1b0b0e0e4',
-				'title'                 => 'test',
-				'fields'                => array(),
-				'location'              => array(
-					array(
-						array(
-							'param'    => 'options_page',
-							'operator' => '==',
-							'value'    => 'options-general.php?page=jwr-control-panel',
-						),
-					),
-				),
-				'menu_order'            => 0,
-				'position'              => 'normal',
-				'style'                 => 'default',
-				'label_placement'       => 'top',
-				'instruction_placement' => 'label',
-				'active'                => true,
-				'description'           => '',
+				'page_title' => 'JWR Control Panel',
+				'menu_title' => 'JWR Control Panel',
+				'menu_slug'  => 'jwr-control-panel',
+				'capability' => 'edit_posts',
+				'redirect'   => false,
 			)
 		);
 	}
 }
+add_action( 'acf/init', __NAMESPACE__ . '\create_options_page', 8 );
+
+/**
+ * Update JWR Control Panel.
+ *
+ * @return void
+ */
+function update_jwr_control_panel() {
+	global $wp_filesystem;
+
+	if ( ! file_exists( __DIR__ . '/acf-json/group_jwr_control_panel.json' ) ) {
+		global $wpdb;
+		$wpdb->query( "DELETE FROM `wp_options` WHERE option_name LIKE 'jwrcp_%'" );
+		$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
+	}
+
+	do_action( 'update_jwr_control_panel' );
+}
+add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );

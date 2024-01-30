@@ -1,0 +1,22 @@
+{
+	"key": "group_jwr_control_panel",
+	"title": "Options Panel",
+	"fields": [],
+	"location": [
+		[
+			{
+				"param": "options_page",
+				"operator": "==",
+				"value": "jwr-control-panel"
+			}
+		]
+	],
+	"menu_order": 0,
+	"position": "normal",
+	"style": "default",
+	"hide_on_screen": "",
+	"active": true,
+	"description": "",
+	"show_in_rest": 0,
+	"modified": 1706524408
+}

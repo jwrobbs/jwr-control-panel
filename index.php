@@ -21,11 +21,12 @@ defined( 'ABSPATH' ) || die();
 if ( ! function_exists( 'is_plugin_active' ) ) {
 	include_once ABSPATH . 'wp-admin/includes/plugin.php';
 }
-if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) {
+if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) || \function_exists( 'set_acf_json_save_point' ) ) {
 	return;
 }
 
 require_once 'php/field-group-fns.php';
+require_once 'php/class-jwr-plugin-options.php';
 
 /**
  * Set the path for the ACF JSON files.
@@ -84,7 +85,6 @@ function update_jwr_control_panel() {
 		$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
 	}
 
-	require_once 'php/class-acf-fields.php';
 	do_action( 'update_jwr_control_panel' );
 }
 add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );

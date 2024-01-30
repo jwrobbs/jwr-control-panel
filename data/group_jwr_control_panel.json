@@ -1,1 +1,22 @@
-{"key":"group_jwr_control_panel","title":"jwr-control-panel","fields":[{"key":"field_65b7d011b1e78","label":"","name":"","aria-label":"","type":"message","instructions":"","required":0,"conditional_logic":0,"wrapper":{"width":"","class":"","id":""},"message":"This is a new test message.","new_lines":"wpautop","esc_html":0}],"location":[[{"param":"options_page","operator":"==","value":"jwr-control-panel"}]],"menu_order":0,"position":"normal","style":"default","label_placement":"top","instruction_placement":"label","hide_on_screen":"","active":true,"description":"","show_in_rest":0,"modified":1706524408}
+{
+	"key": "group_jwr_control_panel",
+	"title": "Options Panel",
+	"fields": [],
+	"location": [
+		[
+			{
+				"param": "options_page",
+				"operator": "==",
+				"value": "jwr-control-panel"
+			}
+		]
+	],
+	"menu_order": 0,
+	"position": "normal",
+	"style": "default",
+	"hide_on_screen": "",
+	"active": true,
+	"description": "",
+	"show_in_rest": 0,
+	"modified": 1706524408
+}

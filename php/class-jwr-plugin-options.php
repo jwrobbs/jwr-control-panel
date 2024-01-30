@@ -98,6 +98,51 @@ class JWR_Plugin_Options {
 	}
 
 	/**
+	 * Add number field.
+	 *
+	 * @param string $field_label   The name of the field.
+	 * @param string $field_slug    The slug of the field.
+	 * @param string $min           The minimum value.
+	 * @param string $max           The maximum value.
+	 * @param string $step          The step value.
+	 * @param string $default_value The default value.
+	 * @param int    $width         The width of the field.
+	 */
+	public function add_number_field(
+		$field_label,
+		$field_slug,
+		$min = '',
+		$max = '',
+		$step = '',
+		$default_value = '',
+		$width = 100
+	) {
+		$field_slug         = $this->string_to_slug( $field_slug );
+		$this->group_data[] = array(
+			'key'               => 'key_' . $this->group_id . '_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'number',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'default_value'     => $default_value,
+			'min'               => $min,
+			'max'               => $max,
+			'placeholder'       => '',
+			'step'              => $step,
+			'prepend'           => '',
+			'append'            => '',
+		);
+	}
+
+	/**
 	 * Turn string into a slug.
 	 *
 	 * @param string $bad_string The string to turn into a slug.
@@ -119,7 +164,8 @@ class JWR_Plugin_Options {
 			Add new tab.
 			Save JSON.
 		*/
-		$saved_version = \get_option( 'cp_' . $this->group_id );
+		$option_prefix = 'jwrcp_';
+		$saved_version = \get_option( $option_prefix . $this->group_id );
 		if ( $saved_version === $this->version ) {
 			return;
 		}
@@ -137,11 +183,11 @@ class JWR_Plugin_Options {
 
 			$json_array['fields'][] = $field;
 		}
-
-		$json_string = json_encode( $json_array );
+		$json_array['modified'] = time();
+		$json_string            = json_encode( $json_array );
 		file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
 
-		\update_option( 'cp_' . $this->group_id, $this->version );
+		\update_option( $option_prefix . $this->group_id, $this->version );
 	}
 
 	/**

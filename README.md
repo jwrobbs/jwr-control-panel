@@ -3,7 +3,7 @@ Control Panel is a system I am using to create a shared control/options panel fo
 
 ***Note** This system requires ACF Pro.*
 
-Status: $${\color{orange}In Development}$$
+Status: $${\color{red}In Development}$$
 
 ## To Do/Wishlist
 **To Do**

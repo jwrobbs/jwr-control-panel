@@ -18,5 +18,6 @@
 	"active": true,
 	"description": "",
 	"show_in_rest": 0,
-	"modified": 1706524408
+	"modified": 1706524408,
+	"private": true
 }

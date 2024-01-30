@@ -9,8 +9,6 @@ Status: ***In Development***
 **To Do**
 - Fix version checking -> move into the loop.
 - Make field group private.
-- Deactivate User REST API.
-- Add option for Deactivate User REST API.
 
 **Wishlist**
 - Add a system to control tab order.

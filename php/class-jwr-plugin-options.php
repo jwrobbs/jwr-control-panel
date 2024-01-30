@@ -95,8 +95,6 @@ class JWR_Plugin_Options {
 			'prepend'           => '',
 			'append'            => '',
 		);
-		$test_data          = print_r( $this->group_data, true );
-			\update_field( 'field_65b7c94a8f5af', $test_data, 'option' );
 	}
 
 	/**
@@ -129,9 +127,6 @@ class JWR_Plugin_Options {
 		$file_contents = file_get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
 		$json_array    = json_decode( $file_contents, true );
 
-		// $test_data = print_r( $this->group_data, true );
-		// \update_field( 'field_65b7c94a8f5af', $test_data, 'option' );
-
 		$fields = $this->group_data;
 		foreach ( $fields as $field ) {
 			$tab_position = $this->find_group_key( $json_array, $field['key'] );
@@ -142,9 +137,6 @@ class JWR_Plugin_Options {
 
 			$json_array['fields'][] = $field;
 		}
-
-		// $test_data = print_r( $json_array, true );
-		// \update_field( 'field_65b7c94a8f5af', $test_data, 'option' );
 
 		$json_string = json_encode( $json_array );
 		file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );

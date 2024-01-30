@@ -16,4 +16,4 @@ Status: ***In Development***
 
 ## Contact
 
-Have a question or comment, hit me up at [https://twitter.com/_JoshRobbs]
+Have a question or comment, hit me up at https://twitter.com/_JoshRobbs

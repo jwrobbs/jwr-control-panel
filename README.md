@@ -5,15 +5,6 @@ Control Panel is a system I am using to create a shared control/options panel fo
 
 Status: ***In Development***
 
-## To Do/Wishlist
-**To Do**
-- Fix version checking -> move into the loop.
-- Make field group private.
-
-**Wishlist**
-- Add a system to control tab order.
-- Add a reset button.
-
 ## Contact
 
 Have a question or comment, hit me up at https://twitter.com/_JoshRobbs

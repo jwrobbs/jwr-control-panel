@@ -19,7 +19,12 @@ defined( 'ABSPATH' ) || die();
  * @return bool
  */
 function options_page_exists( $options_page_title ) {
-	$pages  = \acf_get_options_pages();
+	$pages = \acf_get_options_pages();
+
+	if ( false === $pages ) {
+		return false;
+	}
+
 	$titles = array();
 	foreach ( $pages as $page ) {
 		$titles[] = $page['page_title'];

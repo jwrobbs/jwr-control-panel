@@ -12,6 +12,30 @@ namespace JWR\JWR_Control_Panel\PHP;
 
 defined( 'ABSPATH' ) || die();
 
+/*
+	[] Update Local JSON path to be specific to the plugin.
+*/
+
+/*
+	Available fields:
+		Text - add_text_field
+		Number - add_number_field
+
+
+	Fields to add:
+		True/false
+		Checkbox
+		Select
+		Radio
+		URL
+		Email
+		Image
+		File
+		WYSIWYG editor
+
+	Not a complete list, but it's a starting point.
+*/
+
 /**
  * Class for adding options to the JWR Control Panel.
  */
@@ -65,6 +89,30 @@ class JWR_Plugin_Options {
 			'endpoint'          => 0,
 		);
 	}
+
+	// Private functions.
+
+	/**
+	 * Find the tab key in the JSON.
+	 *
+	 * @param array  $json_array The JSON array.
+	 * @param string $key       The key to find.
+	 *
+	 * @return int|false
+	 */
+	private function find_group_key( array $json_array, $key ) {
+		$fields   = $json_array['fields'];
+		$position = 0;
+		foreach ( $fields as $field ) {
+			if ( $key === $field['key'] ) {
+				return $position;
+			}
+			++$position;
+		}
+		return false;
+	}
+
+	// Public functions.
 
 	/**
 	 * Add text field.
@@ -158,12 +206,6 @@ class JWR_Plugin_Options {
 	 * @return void
 	 */
 	public function publish() {
-		/*
-			Get JSON.
-			Remove tab if it exists.
-			Add new tab.
-			Save JSON.
-		*/
 		$option_prefix = 'jwrcp_';
 		$saved_version = \get_option( $option_prefix . $this->group_id );
 		if ( $saved_version === $this->version ) {
@@ -188,25 +230,5 @@ class JWR_Plugin_Options {
 		file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
 
 		\update_option( $option_prefix . $this->group_id, $this->version );
-	}
-
-	/**
-	 * Find the tab key in the JSON.
-	 *
-	 * @param array  $json_array The JSON array.
-	 * @param string $key       The key to find.
-	 *
-	 * @return int|false
-	 */
-	private function find_group_key( array $json_array, $key ) {
-		$fields   = $json_array['fields'];
-		$position = 0;
-		foreach ( $fields as $field ) {
-			if ( $key === $field['key'] ) {
-				return $position;
-			}
-			++$position;
-		}
-		return false;
 	}
 }

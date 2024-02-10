@@ -136,7 +136,9 @@ class JWR_Plugin_Options {
 			return;
 		}
 
-		$file_contents = file_get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
+		// $file_contents = file_get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
+		global $wp_filesystem;
+		$file_contents = $wp_filesystem->get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
 		$json_array    = json_decode( $file_contents, true );
 
 		$fields = $this->group_data;
@@ -151,7 +153,8 @@ class JWR_Plugin_Options {
 		}
 		$json_array['modified'] = time();
 		$json_string            = json_encode( $json_array );
-		file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
+		// file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
+		$wp_filesystem->put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
 
 		\update_option( $option_prefix . $this->group_id, $this->version );
 	}

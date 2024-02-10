@@ -83,7 +83,7 @@ function update_jwr_control_panel() {
 
 	if ( ! file_exists( __DIR__ . '/acf-json/group_jwr_control_panel.json' ) ) {
 		global $wpdb;
-		$wpdb->query( "DELETE FROM `wp_options` WHERE option_name LIKE 'jwrcp_%'" );
+		$wpdb->query( "DELETE FROM `wp_options` WHERE option_name LIKE 'jwrcp_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
 		$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
 	}
 

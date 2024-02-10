@@ -112,7 +112,49 @@ class JWR_Plugin_Options {
 		return false;
 	}
 
+	/**
+	 * Turn string into a slug.
+	 *
+	 * @param string $bad_string The string to turn into a slug.
+	 * @return string
+	 */
+	private function string_to_slug( string $bad_string ) {
+		return strtolower( str_replace( ' ', '_', $bad_string ) );
+	}
+
 	// Public functions.
+
+	/**
+	 * Publish the field group.
+	 *
+	 * @return void
+	 */
+	public function publish() {
+		$option_prefix = 'jwrcp_';
+		$saved_version = \get_option( $option_prefix . $this->group_id );
+		if ( $saved_version === $this->version ) {
+			return;
+		}
+
+		$file_contents = file_get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
+		$json_array    = json_decode( $file_contents, true );
+
+		$fields = $this->group_data;
+		foreach ( $fields as $field ) {
+			$tab_position = $this->find_group_key( $json_array, $field['key'] );
+
+			if ( false !== $tab_position ) {
+				unset( $json_array['fields'][ $tab_position ] );
+			}
+
+			$json_array['fields'][] = $field;
+		}
+		$json_array['modified'] = time();
+		$json_string            = json_encode( $json_array );
+		file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
+
+		\update_option( $option_prefix . $this->group_id, $this->version );
+	}
 
 	/**
 	 * Add text field.
@@ -191,44 +233,45 @@ class JWR_Plugin_Options {
 	}
 
 	/**
-	 * Turn string into a slug.
+	 * Add true/false field.
 	 *
-	 * @param string $bad_string The string to turn into a slug.
-	 * @return string
-	 */
-	private function string_to_slug( string $bad_string ) {
-		return strtolower( str_replace( ' ', '_', $bad_string ) );
-	}
-
-	/**
-	 * Publish the field group.
+	 * @param string $field_label   The name of the field.
+	 * @param string $field_slug    The slug of the field.
+	 * @param string $default_value The default value.
+	 * @param string $on_text       The text for the "on" state.
+	 * @param string $off_text      The text for the "off" state.
+	 * @param int    $width         The width of the field.
 	 *
 	 * @return void
 	 */
-	public function publish() {
-		$option_prefix = 'jwrcp_';
-		$saved_version = \get_option( $option_prefix . $this->group_id );
-		if ( $saved_version === $this->version ) {
-			return;
-		}
-
-		$file_contents = file_get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
-		$json_array    = json_decode( $file_contents, true );
-
-		$fields = $this->group_data;
-		foreach ( $fields as $field ) {
-			$tab_position = $this->find_group_key( $json_array, $field['key'] );
-
-			if ( false !== $tab_position ) {
-				unset( $json_array['fields'][ $tab_position ] );
-			}
-
-			$json_array['fields'][] = $field;
-		}
-		$json_array['modified'] = time();
-		$json_string            = json_encode( $json_array );
-		file_put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
-
-		\update_option( $option_prefix . $this->group_id, $this->version );
+	public function add_true_false_field(
+		$field_label,
+		$field_slug,
+		$default_value = 1,
+		$on_text = 'True',
+		$off_text = 'False',
+		$width = 100
+	) {
+		$field_slug         = $this->string_to_slug( $field_slug );
+		$this->group_data[] = array(
+			'key'               => 'key_' . $this->group_id . '_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'true_false',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'message'           => 'MESSAGE',
+			'default_value'     => $default_value,
+			'ui_on_text'        => $on_text,
+			'ui_off_text'       => $off_text,
+			'ui'                => 1,
+		);
 	}
 }

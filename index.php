@@ -39,54 +39,62 @@ function set_acf_json_save_point( $path ) { // phpcs:ignore Generic.CodeAnalysis
 }
 add_filter( 'acf/settings/save_json', __NAMESPACE__ . '\set_acf_json_save_point' );
 
-/**
- * Set load path for ACF JSON files.
- *
- * @param array $paths The paths to the ACF JSON files.
- * @return array
- */
-function set_acf_json_load_point( $paths ) {
-	unset( $paths[0] );
-	$paths[] = __DIR__ . '/acf-json';
-	return $paths;
-}
-add_filter( 'acf/settings/load_json', __NAMESPACE__ . '\set_acf_json_load_point' );
 
-
-/**
- * Create options page if needed.
- *
- * @return void
- */
-function create_options_page() {
-	if ( ! options_page_exists( 'JWR Control Panel' ) ) {
-		\acf_add_options_page(
-			array(
-				'page_title' => 'JWR Control Panel',
-				'menu_title' => 'JWR Control Panel',
-				'menu_slug'  => 'jwr-control-panel',
-				'capability' => 'edit_posts',
-				'redirect'   => false,
-			)
-		);
+if ( ! function_exists( 'set_acf_json_load_point' ) ) {
+	/**
+	 * Set load path for ACF JSON files.
+	 *
+	 * @param array $paths The paths to the ACF JSON files.
+	 * @return array
+	 */
+	function set_acf_json_load_point( $paths ) {
+		unset( $paths[0] );
+		$paths[] = __DIR__ . '/acf-json';
+		return $paths;
 	}
+	add_filter( 'acf/settings/load_json', __NAMESPACE__ . '\set_acf_json_load_point' );
 }
-add_action( 'acf/init', __NAMESPACE__ . '\create_options_page', 8 );
 
-/**
- * Update JWR Control Panel.
- *
- * @return void
- */
-function update_jwr_control_panel() {
-	global $wp_filesystem;
 
-	if ( ! file_exists( __DIR__ . '/acf-json/group_jwr_control_panel.json' ) ) {
-		global $wpdb;
-		$wpdb->query( "DELETE FROM `wp_options` WHERE option_name LIKE 'jwrcp_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
+if ( ! function_exists( 'options_page_exists' ) ) {
+	/**
+	 * Create options page if needed.
+	 *
+	 * @return void
+	 */
+	function create_options_page() {
+		if ( ! options_page_exists( 'JWR Control Panel' ) ) {
+			\acf_add_options_page(
+				array(
+					'page_title' => 'JWR Control Panel',
+					'menu_title' => 'JWR Control Panel',
+					'menu_slug'  => 'jwr-control-panel',
+					'capability' => 'edit_posts',
+					'redirect'   => false,
+				)
+			);
+		}
 	}
-
-	do_action( 'update_jwr_control_panel' );
+	add_action( 'acf/init', __NAMESPACE__ . '\create_options_page', 8 );
 }
-add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );
+
+if ( ! function_exists( 'update_jwr_control_panel' ) ) {
+
+	/**
+	 * Update JWR Control Panel.
+	 *
+	 * @return void
+	 */
+	function update_jwr_control_panel() {
+		global $wp_filesystem;
+
+		if ( ! file_exists( __DIR__ . '/acf-json/group_jwr_control_panel.json' ) ) {
+			global $wpdb;
+			$wpdb->query( "DELETE FROM `wp_options` WHERE option_name LIKE 'jwrcp_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
+		}
+
+		do_action( 'update_jwr_control_panel' );
+	}
+	add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );
+}

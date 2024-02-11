@@ -110,7 +110,11 @@ class JWR_Plugin_Options {
 	 * @return void
 	 */
 	public function publish() {
-
+		global $wp_filesystem;
+		if ( null === $wp_filesystem ) {
+			require_once ABSPATH . '/wp-admin/includes/file.php';
+			WP_Filesystem();
+		}
 		global $wp_filesystem;
 		$json_array = json_decode( $wp_filesystem->get_contents( \JWR_CONTROL_PANEL_DATA_FILE ), true );
 
@@ -127,6 +131,20 @@ class JWR_Plugin_Options {
 		$wp_filesystem->put_contents( \JWR_CONTROL_PANEL_JSON_FILE, $json_string );
 		\update_option( 'jwr_control_panel_hash', $new_hash );
 	}
+
+	/**
+	 * Update the Local JSON file.
+	 *
+	 * @return void
+	 */
+	public static function update_local_json() {
+		$options = new JWR_Plugin_Options();
+		do_action( 'update_jwr_control_panel' );
+		$options->publish();
+	}
+
+	// Adding fields.
+
 	/**
 	 * Add tab.
 	 *

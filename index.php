@@ -120,18 +120,3 @@ if ( ! function_exists( 'options_page_exists' ) ) {
 	}
 	add_action( 'acf/init', __NAMESPACE__ . '\create_options_page', 8 );
 }
-
-if ( ! function_exists( 'update_jwr_control_panel' ) ) {
-
-	/**
-	 * Update JWR Control Panel.
-	 *
-	 * @return void
-	 */
-	function update_jwr_control_panel() {
-		$options = new JWR_Plugin_Options();
-		do_action( 'update_jwr_control_panel' );
-		$options->publish();
-	}
-	add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );
-}

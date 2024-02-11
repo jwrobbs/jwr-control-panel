@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || die();
 		Text - add_text_field
 		Number - add_number_field
 		True/false
+		Color picker
 
 	Fields to add:
 		Checkbox
@@ -272,6 +273,38 @@ class JWR_Plugin_Options {
 			'ui_on_text'        => $on_text,
 			'ui_off_text'       => $off_text,
 			'ui'                => 1,
+		);
+	}
+
+	/**
+	 * Add color picker field.
+	 *
+	 * @param string $field_label The name of the field.
+	 * @param string $field_slug  The slug of the field.
+	 * @param string $default     The default value.
+	 * @param int    $width       The width of the field.
+	 *
+	 * @return void
+	 */
+	public function add_color_picker_field( string $field_label, string $field_slug, string $default = '#FFFFFF', int $width = 25 ) {
+		$field_slug         = $this->string_to_slug( $field_slug );
+		$this->group_data[] = array(
+			'key'               => 'key_' . $this->group_id . '_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'color_picker',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'default_value'     => $default,
+			'enable_opacity'    => 1,
+			'return_format'     => 'string',
 		);
 	}
 }

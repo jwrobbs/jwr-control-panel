@@ -36,9 +36,10 @@ if ( ! \function_exists( 'set_acf_json_save_point' ) ) {
 	 * @return string
 	 */
 	function set_acf_json_save_point( $path ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		return __DIR__ . '/acf-json';
+		$upload_dir = wp_upload_dir();
+		return $upload_dir['basedir'] . '/control-panel-json';
 	}
-	add_filter( 'acf/settings/save_json', __NAMESPACE__ . '\set_acf_json_save_point' );
+	add_filter( 'acf/settings/save_json/key=group_jwr_control_panel', __NAMESPACE__ . '\set_acf_json_save_point' );
 }
 
 

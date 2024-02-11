@@ -12,6 +12,8 @@
 
 namespace JWR\ControlPanel;
 
+use JWR\JWR_Control_Panel\PHP\JWR_Plugin_Options;
+
 use function JWR\JWR_Control_Panel\PHP\options_page_exists;
 
 defined( 'ABSPATH' ) || die();
@@ -20,7 +22,7 @@ defined( 'ABSPATH' ) || die();
  * Plugin constants.
  */
 $upload_dir = wp_upload_dir();
-$json_dir   = $upload_dir['basedir'] . '/control-panel-json';
+$json_dir   = __DIR__ . '/acf-json';
 $json_file  = $json_dir . '/group_jwr_control_panel.json';
 $data_dir   = __DIR__ . '/data';
 $data_file  = $data_dir . '/group_jwr_control_panel.json';
@@ -51,6 +53,8 @@ function init() {
 
 	if ( ! $wp_filesystem->is_dir( $json_dir ) ) {
 		$wp_filesystem->mkdir( $json_dir );
+	}
+	if ( ! $wp_filesystem->exists( $json_dir . '/index.php' ) ) {
 		$content = "<?php\n/** Silence is golden. */\n";
 		$wp_filesystem->put_contents( $json_dir . '/index.php', $content );
 	}
@@ -125,15 +129,9 @@ if ( ! function_exists( 'update_jwr_control_panel' ) ) {
 	 * @return void
 	 */
 	function update_jwr_control_panel() {
-		global $wp_filesystem;
-
-		if ( ! file_exists( __DIR__ . '/acf-json/group_jwr_control_panel.json' ) ) {
-			global $wpdb;
-			$wpdb->query( "DELETE FROM `wp_options` WHERE option_name LIKE 'jwrcp_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$wp_filesystem->copy( __DIR__ . '/data/group_jwr_control_panel.json', __DIR__ . '/acf-json/group_jwr_control_panel.json' );
-		}
-
+		$options = new JWR_Plugin_Options();
 		do_action( 'update_jwr_control_panel' );
+		$options->publish();
 	}
 	add_action( 'wp_loaded', __NAMESPACE__ . '\update_jwr_control_panel' );
 }

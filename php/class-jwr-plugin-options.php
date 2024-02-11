@@ -20,10 +20,9 @@ defined( 'ABSPATH' ) || die();
 	Available fields:
 		Text - add_text_field
 		Number - add_number_field
-
+		True/false
 
 	Fields to add:
-		True/false
 		Checkbox
 		Select
 		Radio

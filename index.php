@@ -1,14 +1,13 @@
 <?php
 /**
- * Shared control panel for JWR plugins.
- * Included as a submodule in each of my plugins.
+ * Plugin Name: Josh's control panel
  *
- * Assumes that it will be included in the top level of the plugin.
+ * Shared control panel for JWR plugins.
  *
  * @author Josh Robbs <josh@joshrobbs.com>
  * @package JWR_control_panel
- * @version 1.0.0
- * @since   2024-01-29
+ * @version 2.0.0
+ * @since   2024-02-11
  */
 
 namespace JWR\ControlPanel;
@@ -17,13 +16,51 @@ use function JWR\JWR_Control_Panel\PHP\options_page_exists;
 
 defined( 'ABSPATH' ) || die();
 
-// Return if Advanced Custom Fields is not installed.
-if ( ! function_exists( 'is_plugin_active' ) ) {
-	include_once ABSPATH . 'wp-admin/includes/plugin.php';
+/**
+ * Plugin constants.
+ */
+$upload_dir = wp_upload_dir();
+$json_dir   = $upload_dir['basedir'] . '/control-panel-json';
+$json_file  = $json_dir . '/group_jwr_control_panel.json';
+$data_dir   = __DIR__ . '/data';
+$data_file  = $data_dir . '/group_jwr_control_panel.json';
+define( 'JWR_CONTROL_PANEL_DATA_FILE', $data_file );
+define( 'JWR_CONTROL_PANEL_JSON_DIR', $json_dir );
+define( 'JWR_CONTROL_PANEL_JSON_FILE', $json_file );
+
+/**
+ * Initialize the plugin.
+ *
+ * @return void
+ */
+function init() {
+	if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) ) {
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+		wp_die( 'This plugin requires Advanced Custom Fields Pro to be installed and active.' );
+	}
+
+	global $wp_filesystem;
+	if ( null === $wp_filesystem ) {
+		require_once ABSPATH . '/wp-admin/includes/file.php';
+		WP_Filesystem();
+	}
+
+	$json_dir  = str_replace( \ABSPATH, $wp_filesystem->abspath(), \JWR_CONTROL_PANEL_JSON_DIR );
+	$data_file = str_replace( \ABSPATH, $wp_filesystem->abspath(), \JWR_CONTROL_PANEL_DATA_FILE );
+	$json_file = str_replace( \ABSPATH, $wp_filesystem->abspath(), \JWR_CONTROL_PANEL_JSON_FILE );
+
+	if ( ! $wp_filesystem->is_dir( $json_dir ) ) {
+		$wp_filesystem->mkdir( $json_dir );
+		$content = "<?php\n/** Silence is golden. */\n";
+		$wp_filesystem->put_contents( $json_dir . '/index.php', $content );
+	}
+
+	if ( ! $wp_filesystem->exists( $json_file ) ) {
+		$contents = $wp_filesystem->get_contents( $data_file );
+		$wp_filesystem->put_contents( $json_file, $contents );
+	}
 }
-if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) || \function_exists( 'set_acf_json_save_point' ) ) {
-	return;
-}
+\register_activation_hook( __FILE__, __NAMESPACE__ . '\init' );
 
 require_once 'php/field-group-fns.php';
 require_once 'php/class-jwr-plugin-options.php';
@@ -36,8 +73,7 @@ if ( ! \function_exists( 'set_acf_json_save_point' ) ) {
 	 * @return string
 	 */
 	function set_acf_json_save_point( $path ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-		$upload_dir = wp_upload_dir();
-		return $upload_dir['basedir'] . '/control-panel-json';
+		return \JWR_CONTROL_PANEL_JSON_FILE;
 	}
 	add_filter( 'acf/settings/save_json/key=group_jwr_control_panel', __NAMESPACE__ . '\set_acf_json_save_point' );
 }
@@ -52,7 +88,7 @@ if ( ! function_exists( 'set_acf_json_load_point' ) ) {
 	 */
 	function set_acf_json_load_point( $paths ) {
 		unset( $paths[0] );
-		$paths[] = __DIR__ . '/acf-json';
+		$paths[] = \JWR_CONTROL_PANEL_JSON_DIR;
 		return $paths;
 	}
 	add_filter( 'acf/settings/load_json', __NAMESPACE__ . '\set_acf_json_load_point' );

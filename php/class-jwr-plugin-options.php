@@ -13,14 +13,13 @@ namespace JWR\JWR_Control_Panel\PHP;
 defined( 'ABSPATH' ) || die();
 
 /*
-	[] Update Local JSON path to be specific to the plugin.
-*/
-
-/*
 	Available fields:
-		Text - add_text_field
 		Number - add_number_field
 		True/false
+		Color picker
+
+	Needs updating:
+		Text - add_text_field
 
 	Fields to add:
 		Checkbox
@@ -55,38 +54,19 @@ class JWR_Plugin_Options {
 	private array $group_data;
 
 	/**
-	 * Constructor.
+	 * Instance
 	 *
-	 * @param string $group_name The name of the field group.
-	 * @param string $group_id   The ID of the field group.
-	 * @param string $version    The version of the field group.
+	 * @var JWR_Plugin_Options
 	 */
-	public function __construct(
-		private string $group_name,
-		private string $group_id,
-		private string $version
-	) {
+	public static $instance;
 
-		$this->group_id     = $this->string_to_slug( $group_id );
-		$this->slug         = $this->string_to_slug( $group_name );
-		$this->group_data   = array();
-		$this->group_data[] = array(
-			'key'               => 'key_' . $this->group_id . '_' . $this->slug,
-			'label'             => $group_name,
-			'name'              => $this->slug,
-			'aria-label'        => '',
-			'type'              => 'tab',
-			'instructions'      => '',
-			'required'          => 0,
-			'conditional_logic' => 0,
-			'wrapper'           => array(
-				'width' => '',
-				'class' => '',
-				'id'    => '',
-			),
-			'placement'         => 'left',
-			'endpoint'          => 0,
-		);
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->group_data = array();
+
+		self::$instance = $this;
 	}
 
 	// Private functions.
@@ -123,37 +103,61 @@ class JWR_Plugin_Options {
 
 	// Public functions.
 
+
 	/**
 	 * Publish the field group.
 	 *
 	 * @return void
 	 */
 	public function publish() {
-		$option_prefix = 'jwrcp_';
-		$saved_version = \get_option( $option_prefix . $this->group_id );
-		if ( $saved_version === $this->version ) {
+
+		global $wp_filesystem;
+		$json_array = json_decode( $wp_filesystem->get_contents( \JWR_CONTROL_PANEL_DATA_FILE ), true );
+
+		$json_array['fields'] = $this->group_data;
+
+		$new_hash = md5( wp_json_encode( $json_array ) );
+		$old_hash = \get_option( 'jwr_control_panel_hash' );
+		if ( $new_hash === $old_hash ) {
 			return;
 		}
 
-		global $wp_filesystem;
-		$file_contents = $wp_filesystem->get_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json' );
-		$json_array    = json_decode( $file_contents, true );
-
-		$fields = $this->group_data;
-		foreach ( $fields as $field ) {
-			$tab_position = $this->find_group_key( $json_array, $field['key'] );
-
-			if ( false !== $tab_position ) {
-				unset( $json_array['fields'][ $tab_position ] );
-			}
-
-			$json_array['fields'][] = $field;
-		}
 		$json_array['modified'] = time();
 		$json_string            = wp_json_encode( $json_array );
-		$wp_filesystem->put_contents( __DIR__ . '/../acf-json/group_jwr_control_panel.json', $json_string );
+		$wp_filesystem->put_contents( \JWR_CONTROL_PANEL_JSON_FILE, $json_string );
+		\update_option( 'jwr_control_panel_hash', $new_hash );
+	}
+	/**
+	 * Add tab.
+	 *
+	 * @param string $group_name The name of the group.
+	 * @param string $group_id   The ID of the group.
+	 *
+	 * @return void
+	 */
+	public static function add_tab( string $group_name, string $group_id ) {
+		$options = self::get_instance();
+		$slug    = $options->string_to_slug( $group_name );
 
-		\update_option( $option_prefix . $this->group_id, $this->version );
+		$new_tab = array(
+			'key'               => 'key_' . $group_id . '_' . $slug,
+			'label'             => $group_name,
+			'name'              => $slug,
+			'aria-label'        => '',
+			'type'              => 'tab',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => '',
+				'class' => '',
+				'id'    => '',
+			),
+			'placement'         => 'left',
+			'endpoint'          => 0,
+		);
+
+		$options->group_data[] = $new_tab;
 	}
 
 	/**
@@ -198,7 +202,7 @@ class JWR_Plugin_Options {
 	 * @param string $default_value The default value.
 	 * @param int    $width         The width of the field.
 	 */
-	public function add_number_field(
+	public static function add_number_field(
 		$field_label,
 		$field_slug,
 		$min = '',
@@ -207,9 +211,10 @@ class JWR_Plugin_Options {
 		$default_value = '',
 		$width = 100
 	) {
-		$field_slug         = $this->string_to_slug( $field_slug );
-		$this->group_data[] = array(
-			'key'               => 'key_' . $this->group_id . '_' . $field_slug,
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$options->group_data[] = array(
+			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
 			'aria-label'        => '',
@@ -244,7 +249,7 @@ class JWR_Plugin_Options {
 	 *
 	 * @return void
 	 */
-	public function add_true_false_field(
+	public static function add_true_false_field(
 		$field_label,
 		$field_slug,
 		$default_value = 1,
@@ -252,9 +257,10 @@ class JWR_Plugin_Options {
 		$off_text = 'False',
 		$width = 100
 	) {
-		$field_slug         = $this->string_to_slug( $field_slug );
-		$this->group_data[] = array(
-			'key'               => 'key_' . $this->group_id . '_' . $field_slug,
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$options->group_data[] = array(
+			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
 			'aria-label'        => '',
@@ -267,11 +273,59 @@ class JWR_Plugin_Options {
 				'class' => '',
 				'id'    => '',
 			),
-			'message'           => 'MESSAGE',
+			'message'           => '',
 			'default_value'     => $default_value,
 			'ui_on_text'        => $on_text,
 			'ui_off_text'       => $off_text,
 			'ui'                => 1,
 		);
+	}
+
+	/**
+	 * Add color picker field.
+	 *
+	 * @param string $field_label   The name of the field.
+	 * @param string $field_slug    The slug of the field.
+	 * @param string $default_value The default value.
+	 * @param int    $width         The width of the field.
+	 *
+	 * @return void
+	 */
+	public static function add_color_picker_field( string $field_label, string $field_slug, string $default_value = '#FFFFFF', int $width = 25 ) {
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$options->group_data[] = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'color_picker',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'default_value'     => $default_value,
+			'enable_opacity'    => 1,
+			'return_format'     => 'string',
+		);
+	}
+
+	// Public static functions.
+
+	/**
+	 * Get singleton.
+	 *
+	 * @return JWR_Plugin_Options
+	 */
+	public static function get_instance() {
+		if ( null === self::$instance ) {
+			self::$instance = new self( '', '', '' );
+		}
+
+		return self::$instance;
 	}
 }

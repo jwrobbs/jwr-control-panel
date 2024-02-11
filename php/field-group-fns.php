@@ -12,26 +12,28 @@ namespace JWR\JWR_Control_Panel\PHP;
 
 defined( 'ABSPATH' ) || die();
 
-/**
- * Check if options page exists.
- *
- * @param string $options_page_title The title of the options page.
- * @return bool
- */
-function options_page_exists( $options_page_title ) {
-	$pages = \acf_get_options_pages();
+if ( ! function_exists( 'options_page_exists' ) ) {
+	/**
+	 * Check if options page exists.
+	 *
+	 * @param string $options_page_title The title of the options page.
+	 * @return bool
+	 */
+	function options_page_exists( $options_page_title ) {
+		$pages = \acf_get_options_pages();
 
-	if ( false === $pages ) {
-		return false;
-	}
+		if ( false === $pages ) {
+			return false;
+		}
 
-	$titles = array();
-	foreach ( $pages as $page ) {
-		$titles[] = $page['page_title'];
-	}
-	if ( \in_array( $options_page_title, $titles, true ) ) {
-		return true;
-	} else {
-		return false;
+		$titles = array();
+		foreach ( $pages as $page ) {
+			$titles[] = $page['page_title'];
+		}
+		if ( \in_array( $options_page_title, $titles, true ) ) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

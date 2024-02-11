@@ -28,16 +28,18 @@ if ( ! is_plugin_active( 'advanced-custom-fields-pro/acf.php' ) || \function_exi
 require_once 'php/field-group-fns.php';
 require_once 'php/class-jwr-plugin-options.php';
 
-/**
- * Set the path for the ACF JSON files.
- *
- * @param string $path The path to the ACF JSON files.
- * @return string
- */
-function set_acf_json_save_point( $path ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-	return __DIR__ . '/acf-json';
+if ( ! \function_exists( 'set_acf_json_save_point' ) ) {
+	/**
+	 * Set the path for the ACF JSON files.
+	 *
+	 * @param string $path The path to the ACF JSON files.
+	 * @return string
+	 */
+	function set_acf_json_save_point( $path ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return __DIR__ . '/acf-json';
+	}
+	add_filter( 'acf/settings/save_json', __NAMESPACE__ . '\set_acf_json_save_point' );
 }
-add_filter( 'acf/settings/save_json', __NAMESPACE__ . '\set_acf_json_save_point' );
 
 
 if ( ! function_exists( 'set_acf_json_load_point' ) ) {

@@ -119,6 +119,7 @@ class JWR_Plugin_Options {
 
 		$json_array['fields'] = $this->group_data;
 
+		// [] is this obsolete?
 		$new_hash = md5( wp_json_encode( $json_array ) );
 		$old_hash = \get_option( 'jwr_control_panel_hash' );
 		if ( $new_hash === $old_hash ) {
@@ -138,7 +139,13 @@ class JWR_Plugin_Options {
 	 */
 	public static function update_local_json() {
 		$options = new JWR_Plugin_Options();
+
 		do_action( 'update_jwr_control_panel' );
+
+		self::add_tab( 'Control panel settings', 'control_panel_settings' );
+		$checkbox_field = array( 1 => 'Yes, refresh control panel' );
+		self::add_checkbox( 'Refresh control panel', 'refresh_control_panel', $checkbox_field );
+
 		$options->publish();
 	}
 
@@ -175,6 +182,46 @@ class JWR_Plugin_Options {
 		);
 
 		$options->group_data[] = $new_tab;
+	}
+
+	/**
+	 * Add checkbox.
+	 *
+	 * @param string $field_label The name of the field.
+	 * @param string $field_slug  The slug of the field.
+	 * @param array  $choices     The choices for the checkbox. Value => Label.
+	 * @param bool   $toggle_all  Whether to toggle all choices. Default: false.
+	 * @param int    $width       The width of the field.
+	 *
+	 * @return void
+	 */
+	public static function add_checkbox( string $field_label, string $field_slug, array $choices, bool $toggle_all = false, int $width = 100 ) {
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$toggle                = $toggle_all ? 1 : 0;
+		$options->group_data[] = array(
+			'key'                       => 'key_' . $field_slug,
+			'label'                     => $field_label,
+			'name'                      => $field_slug,
+			'aria-label'                => '',
+			'type'                      => 'checkbox',
+			'instructions'              => '',
+			'required'                  => 0,
+			'conditional_logic'         => 0,
+			'wrapper'                   => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'choices'                   => $choices,
+			'default_value'             => array(),
+			'return_format'             => 'value',
+			'allow_custom'              => 0,
+			'layout'                    => 'vertical',
+			'toggle'                    => $toggle,
+			'save_custom'               => 0,
+			'custom_choice_button_text' => '',
+		);
 	}
 
 	/**

@@ -103,7 +103,6 @@ class JWR_Plugin_Options {
 
 	// Public functions.
 
-
 	/**
 	 * Publish the field group.
 	 *
@@ -185,12 +184,13 @@ class JWR_Plugin_Options {
 	 * @param string $field_slug  The slug of the field.
 	 * @param int    $width       The width of the field.
 	 */
-	public function add_text_field( string $field_label, string $field_slug, int $width = 100 ) {
-		$field_slug         = $this->string_to_slug( $field_slug );
-		$this->group_data[] = array(
-			'key'               => 'key_' . $this->group_id . '_' . $field_slug,
+	public static function add_text_field( string $field_label, string $field_slug, int $width = 100 ) {
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$options->group_data[] = array(
+			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
-			'name'              => $this->group_id . '_' . $field_slug,
+			'name'              => $field_slug,
 			'aria-label'        => '',
 			'type'              => 'text',
 			'instructions'      => '',

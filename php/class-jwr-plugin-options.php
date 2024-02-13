@@ -440,6 +440,20 @@ class JWR_Plugin_Options {
 			'sub_fields'        => array(),
 		);
 	}
+
+	/**
+	 * End repeater field.
+	 * Used to add a completed repeater field to the group data.
+	 *
+	 * @return void
+	 */
+	public static function end_repeater_field() {
+		$options               = self::get_instance();
+		$options->group_data[] = $options->repeater;
+		unset( $options->repeater_key );
+		unset( $options->repeater );
+	}
+
 	// Public static functions.
 
 	/**

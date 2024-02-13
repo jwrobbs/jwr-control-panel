@@ -458,6 +458,54 @@ class JWR_Plugin_Options {
 	}
 
 	/**
+	 * Add select field.
+	 *
+	 * @param string $field_label The name of the field.
+	 * @param string $field_slug  The slug of the field.
+	 * @param array  $choices     The choices for the select. Value => Label.
+	 * @param bool   $allow_null  Whether to allow a null value. Default: false.
+	 * @param int    $width       The width of the field.
+	 *
+	 * @return void
+	 */
+	public static function add_select_field(
+		$field_label,
+		$field_slug,
+		$choices,
+		$allow_null = false,
+		$width = 100
+	) {
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$can_null    = $allow_null ? 1 : 0;
+		$field_array = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'select',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'choices'           => $choices,
+			'default_value'     => false,
+			'return_format'     => 'value',
+			'multiple'          => 0,
+			'allow_null'        => $can_null,
+			'ui'                => 0,
+			'ajax'              => 0,
+			'placeholder'       => '',
+		);
+
+		$options->attach_field( $field_array );
+	}
+
+	/**
 	 * Start repeater field.
 	 * After adding the fields, call end_repeater_field.
 	 *

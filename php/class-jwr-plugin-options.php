@@ -164,6 +164,22 @@ class JWR_Plugin_Options {
 		$options->publish();
 	}
 
+	/**
+	 * Attach field array to field group or repeater.
+	 *
+	 * @param array $field_array The field array to attach.
+	 *
+	 * @return void
+	 */
+	private function attach_field( $field_array ) {
+		if ( isset( $this->repeater_key ) ) {
+			$field_array['parent_repeater'] = $this->repeater_key;
+			$this->repeater['sub_fields'][] = $field_array;
+		} else {
+			$this->group_data[] = $field_array;
+		}
+	}
+
 	// Adding fields.
 
 	/**
@@ -205,16 +221,16 @@ class JWR_Plugin_Options {
 	 * @param string $field_label The name of the field.
 	 * @param string $field_slug  The slug of the field.
 	 * @param array  $choices     The choices for the checkbox. Value => Label.
-	 * @param bool   $toggle_all  Whether to toggle all choices. Default: false.
+	 * @param bool   $toggle_all  Whether to give option to toggle all choices. Default: false.
 	 * @param int    $width       The width of the field.
 	 *
 	 * @return void
 	 */
 	public static function add_checkbox( string $field_label, string $field_slug, array $choices, bool $toggle_all = false, int $width = 100 ) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$toggle                = $toggle_all ? 1 : 0;
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$toggle      = $toggle_all ? 1 : 0;
+		$field_array = array(
 			'key'                       => 'key_' . $field_slug,
 			'label'                     => $field_label,
 			'name'                      => $field_slug,
@@ -237,6 +253,8 @@ class JWR_Plugin_Options {
 			'save_custom'               => 0,
 			'custom_choice_button_text' => '',
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**

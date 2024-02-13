@@ -185,6 +185,8 @@ class JWR_Plugin_Options {
 	/**
 	 * Add tab.
 	 *
+	 * Will close any open repeater field.
+	 *
 	 * @param string $group_name The name of the group.
 	 * @param string $group_id   The ID of the group.
 	 *
@@ -193,6 +195,10 @@ class JWR_Plugin_Options {
 	public static function add_tab( string $group_name, string $group_id ) {
 		$options = self::get_instance();
 		$slug    = $options->string_to_slug( $group_name );
+
+		if ( isset( $options->repeater_key ) ) {
+			$options->end_repeater_field();
+		}
 
 		$new_tab = array(
 			'key'               => 'key_' . $group_id . '_' . $slug,
@@ -265,9 +271,9 @@ class JWR_Plugin_Options {
 	 * @param int    $width       The width of the field.
 	 */
 	public static function add_text_field( string $field_label, string $field_slug, int $width = 100 ) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -287,6 +293,8 @@ class JWR_Plugin_Options {
 			'prepend'           => '',
 			'append'            => '',
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -309,9 +317,9 @@ class JWR_Plugin_Options {
 		$default_value = '',
 		$width = 100
 	) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -333,6 +341,8 @@ class JWR_Plugin_Options {
 			'prepend'           => '',
 			'append'            => '',
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -355,9 +365,9 @@ class JWR_Plugin_Options {
 		$off_text = 'False',
 		$width = 100
 	) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -377,6 +387,8 @@ class JWR_Plugin_Options {
 			'ui_off_text'       => $off_text,
 			'ui'                => 1,
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -390,9 +402,9 @@ class JWR_Plugin_Options {
 	 * @return void
 	 */
 	public static function add_color_picker_field( string $field_label, string $field_slug, string $default_value = '#FFFFFF', int $width = 25 ) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -410,6 +422,39 @@ class JWR_Plugin_Options {
 			'enable_opacity'    => 1,
 			'return_format'     => 'string',
 		);
+
+		$options->attach_field( $field_array );
+	}
+
+	/**
+	 * Add URL field.
+	 *
+	 * @param string $field_label   The name of the field.
+	 * @param string $field_slug    The slug of the field.
+	 * @param int    $width         The width of the field.
+	 */
+	public static function add_url_field( string $field_label, string $field_slug, int $width = 100 ) {
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'color_picker',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'default_value'     => '',
+			'placeholder'       => '',
+		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**

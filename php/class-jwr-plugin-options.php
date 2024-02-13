@@ -15,6 +15,9 @@ defined( 'ABSPATH' ) || die();
 /*
 	Available fields:
 
+	Needs testing:
+		Repeater
+
 	Needs updating:
 		Number - add_number_field
 		True/false
@@ -60,6 +63,24 @@ class JWR_Plugin_Options {
 	 * @var JWR_Plugin_Options
 	 */
 	public static $instance;
+
+	/**
+	 * Repeater key.
+	 *
+	 * Set while building a repeater field. Unset by end_repeater_field().
+	 *
+	 * @var string
+	 */
+	private string $repeater_key;
+
+	/**
+	 * Repeater array.
+	 *
+	 * Set while building a repeater field. Unset by end_repeater_field().
+	 *
+	 * @var array
+	 */
+	private array $repeater;
 
 	/**
 	 * Constructor.
@@ -124,7 +145,6 @@ class JWR_Plugin_Options {
 		$json_array['modified'] = time();
 		$json_string            = wp_json_encode( $json_array );
 		$wp_filesystem->put_contents( \JWR_CONTROL_PANEL_JSON_FILE, $json_string );
-		\update_option( 'jwr_control_panel_hash', $new_hash );
 	}
 
 	/**
@@ -374,6 +394,52 @@ class JWR_Plugin_Options {
 		);
 	}
 
+	/**
+	 * Start repeater field.
+	 * After adding the fields, call end_repeater_field.
+	 *
+	 * @param string $field_label  The name of the field.
+	 * @param string $field_slug   The slug of the field.
+	 * @param string $layout       The layout of the field. *Row*, table, or block.
+	 * @param string $button_label The label for the "Add" button.
+	 * @param int    $width        The width of the field.
+	 *
+	 * @return void
+	 */
+	public static function start_repeater_field(
+		$field_label,
+		$field_slug,
+		$layout = 'row',
+		$button_label = 'Add Row',
+		$width = 100
+	) {
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$options->repeater_key = 'key_' . $field_slug;
+		$options->repeater     = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'repeater',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'layout'            => $layout,
+			'pagination'        => 0,
+			'min'               => 0,
+			'max'               => 0,
+			'collapsed'         => '',
+			'button_label'      => $button_label,
+			'rows_per_page'     => 20,
+			'sub_fields'        => array(),
+		);
+	}
 	// Public static functions.
 
 	/**

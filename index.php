@@ -12,8 +12,6 @@
 
 namespace JWR\ControlPanel;
 
-use JWR\JWR_Control_Panel\PHP\JWR_Plugin_Options;
-
 use function JWR\JWR_Control_Panel\PHP\options_page_exists;
 
 defined( 'ABSPATH' ) || die();
@@ -64,10 +62,12 @@ function init() {
 		$wp_filesystem->put_contents( $json_file, $contents );
 	}
 }
+// [] Change this to the hook for consistency.
 \register_activation_hook( __FILE__, __NAMESPACE__ . '\init' );
 
 require_once 'php/field-group-fns.php';
 require_once 'php/class-jwr-plugin-options.php';
+require_once 'php/reset-control-panel.php';
 
 if ( ! \function_exists( 'set_acf_json_save_point' ) ) {
 	/**

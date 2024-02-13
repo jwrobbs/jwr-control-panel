@@ -14,18 +14,18 @@ defined( 'ABSPATH' ) || die();
 
 /*
 	Available fields:
+
+	Needs updating:
 		Number - add_number_field
 		True/false
 		Color picker
-
-	Needs updating:
-		Text - add_text_field
+		Checkbox
+		Text
+		URL
 
 	Fields to add:
-		Checkbox
 		Select
 		Radio
-		URL
 		Email
 		Image
 		File
@@ -42,6 +42,7 @@ class JWR_Plugin_Options {
 	/**
 	 * Slug.
 	 *
+	 * @deprecated 2024-02-13
 	 * @var string
 	 */
 	private string $slug;
@@ -76,6 +77,7 @@ class JWR_Plugin_Options {
 	 *
 	 * @param array  $json_array The JSON array.
 	 * @param string $key       The key to find.
+	 * @deprecated 2024-02-13
 	 *
 	 * @return int|false
 	 */
@@ -118,13 +120,6 @@ class JWR_Plugin_Options {
 		$json_array = json_decode( $wp_filesystem->get_contents( \JWR_CONTROL_PANEL_DATA_FILE ), true );
 
 		$json_array['fields'] = $this->group_data;
-
-		// [] is this obsolete?
-		$new_hash = md5( wp_json_encode( $json_array ) );
-		$old_hash = \get_option( 'jwr_control_panel_hash' );
-		if ( $new_hash === $old_hash ) {
-			return;
-		}
 
 		$json_array['modified'] = time();
 		$json_string            = wp_json_encode( $json_array );

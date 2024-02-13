@@ -22,6 +22,7 @@ if ( ! function_exists( 'options_page_exists' ) ) {
 	function options_page_exists( $options_page_title ) {
 		$pages = \acf_get_options_pages();
 
+		// [] Is this guard adequate?
 		if ( false === $pages ) {
 			return false;
 		}

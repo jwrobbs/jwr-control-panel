@@ -17,17 +17,17 @@ defined( 'ABSPATH' ) || die();
 
 	Needs testing:
 		Repeater
-
-	Needs updating:
 		Number - add_number_field
 		True/false
 		Color picker
 		Checkbox
 		Text
+		Select
 		URL
 
+	Needs updating:
+
 	Fields to add:
-		Select
 		Radio
 		Email
 		Image
@@ -441,7 +441,7 @@ class JWR_Plugin_Options {
 			'label'             => $field_label,
 			'name'              => $field_slug,
 			'aria-label'        => '',
-			'type'              => 'color_picker',
+			'type'              => 'url',
 			'instructions'      => '',
 			'required'          => 0,
 			'conditional_logic' => 0,

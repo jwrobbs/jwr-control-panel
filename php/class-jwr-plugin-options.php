@@ -14,8 +14,6 @@ defined( 'ABSPATH' ) || die();
 
 /*
 	Available fields:
-
-	Needs testing:
 		Repeater
 		Number - add_number_field
 		True/false
@@ -24,6 +22,9 @@ defined( 'ABSPATH' ) || die();
 		Text
 		Select
 		URL
+
+	Needs testing:
+
 
 	Needs updating:
 

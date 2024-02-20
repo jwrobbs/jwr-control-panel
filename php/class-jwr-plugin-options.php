@@ -14,17 +14,21 @@ defined( 'ABSPATH' ) || die();
 
 /*
 	Available fields:
-
-	Needs updating:
+		Repeater
 		Number - add_number_field
 		True/false
 		Color picker
 		Checkbox
 		Text
+		Select
 		URL
 
+	Needs testing:
+
+
+	Needs updating:
+
 	Fields to add:
-		Select
 		Radio
 		Email
 		Image
@@ -60,6 +64,24 @@ class JWR_Plugin_Options {
 	 * @var JWR_Plugin_Options
 	 */
 	public static $instance;
+
+	/**
+	 * Repeater key.
+	 *
+	 * Set while building a repeater field. Unset by end_repeater_field().
+	 *
+	 * @var string
+	 */
+	private string $repeater_key;
+
+	/**
+	 * Repeater array.
+	 *
+	 * Set while building a repeater field. Unset by end_repeater_field().
+	 *
+	 * @var array
+	 */
+	private array $repeater;
 
 	/**
 	 * Constructor.
@@ -124,7 +146,6 @@ class JWR_Plugin_Options {
 		$json_array['modified'] = time();
 		$json_string            = wp_json_encode( $json_array );
 		$wp_filesystem->put_contents( \JWR_CONTROL_PANEL_JSON_FILE, $json_string );
-		\update_option( 'jwr_control_panel_hash', $new_hash );
 	}
 
 	/**
@@ -144,10 +165,28 @@ class JWR_Plugin_Options {
 		$options->publish();
 	}
 
+	/**
+	 * Attach field array to field group or repeater.
+	 *
+	 * @param array $field_array The field array to attach.
+	 *
+	 * @return void
+	 */
+	private function attach_field( $field_array ) {
+		if ( isset( $this->repeater_key ) ) {
+			$field_array['parent_repeater'] = $this->repeater_key;
+			$this->repeater['sub_fields'][] = $field_array;
+		} else {
+			$this->group_data[] = $field_array;
+		}
+	}
+
 	// Adding fields.
 
 	/**
 	 * Add tab.
+	 *
+	 * Will close any open repeater field.
 	 *
 	 * @param string $group_name The name of the group.
 	 * @param string $group_id   The ID of the group.
@@ -157,6 +196,10 @@ class JWR_Plugin_Options {
 	public static function add_tab( string $group_name, string $group_id ) {
 		$options = self::get_instance();
 		$slug    = $options->string_to_slug( $group_name );
+
+		if ( isset( $options->repeater_key ) ) {
+			$options->end_repeater_field();
+		}
 
 		$new_tab = array(
 			'key'               => 'key_' . $group_id . '_' . $slug,
@@ -185,16 +228,16 @@ class JWR_Plugin_Options {
 	 * @param string $field_label The name of the field.
 	 * @param string $field_slug  The slug of the field.
 	 * @param array  $choices     The choices for the checkbox. Value => Label.
-	 * @param bool   $toggle_all  Whether to toggle all choices. Default: false.
+	 * @param bool   $toggle_all  Whether to give option to toggle all choices. Default: false.
 	 * @param int    $width       The width of the field.
 	 *
 	 * @return void
 	 */
 	public static function add_checkbox( string $field_label, string $field_slug, array $choices, bool $toggle_all = false, int $width = 100 ) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$toggle                = $toggle_all ? 1 : 0;
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$toggle      = $toggle_all ? 1 : 0;
+		$field_array = array(
 			'key'                       => 'key_' . $field_slug,
 			'label'                     => $field_label,
 			'name'                      => $field_slug,
@@ -217,6 +260,8 @@ class JWR_Plugin_Options {
 			'save_custom'               => 0,
 			'custom_choice_button_text' => '',
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -227,9 +272,9 @@ class JWR_Plugin_Options {
 	 * @param int    $width       The width of the field.
 	 */
 	public static function add_text_field( string $field_label, string $field_slug, int $width = 100 ) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -249,6 +294,8 @@ class JWR_Plugin_Options {
 			'prepend'           => '',
 			'append'            => '',
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -271,9 +318,9 @@ class JWR_Plugin_Options {
 		$default_value = '',
 		$width = 100
 	) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -295,6 +342,8 @@ class JWR_Plugin_Options {
 			'prepend'           => '',
 			'append'            => '',
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -317,9 +366,9 @@ class JWR_Plugin_Options {
 		$off_text = 'False',
 		$width = 100
 	) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -339,6 +388,8 @@ class JWR_Plugin_Options {
 			'ui_off_text'       => $off_text,
 			'ui'                => 1,
 		);
+
+		$options->attach_field( $field_array );
 	}
 
 	/**
@@ -352,9 +403,9 @@ class JWR_Plugin_Options {
 	 * @return void
 	 */
 	public static function add_color_picker_field( string $field_label, string $field_slug, string $default_value = '#FFFFFF', int $width = 25 ) {
-		$options               = self::get_instance();
-		$field_slug            = $options->string_to_slug( $field_slug );
-		$options->group_data[] = array(
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
 			'key'               => 'key_' . $field_slug,
 			'label'             => $field_label,
 			'name'              => $field_slug,
@@ -372,6 +423,147 @@ class JWR_Plugin_Options {
 			'enable_opacity'    => 1,
 			'return_format'     => 'string',
 		);
+
+		$options->attach_field( $field_array );
+	}
+
+	/**
+	 * Add URL field.
+	 *
+	 * @param string $field_label   The name of the field.
+	 * @param string $field_slug    The slug of the field.
+	 * @param int    $width         The width of the field.
+	 */
+	public static function add_url_field( string $field_label, string $field_slug, int $width = 100 ) {
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$field_array = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'url',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'default_value'     => '',
+			'placeholder'       => '',
+		);
+
+		$options->attach_field( $field_array );
+	}
+
+	/**
+	 * Add select field.
+	 *
+	 * @param string $field_label The name of the field.
+	 * @param string $field_slug  The slug of the field.
+	 * @param array  $choices     The choices for the select. Value => Label.
+	 * @param bool   $allow_null  Whether to allow a null value. Default: false.
+	 * @param int    $width       The width of the field.
+	 *
+	 * @return void
+	 */
+	public static function add_select_field(
+		$field_label,
+		$field_slug,
+		$choices,
+		$allow_null = false,
+		$width = 100
+	) {
+		$options     = self::get_instance();
+		$field_slug  = $options->string_to_slug( $field_slug );
+		$can_null    = $allow_null ? 1 : 0;
+		$field_array = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'select',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'choices'           => $choices,
+			'default_value'     => false,
+			'return_format'     => 'value',
+			'multiple'          => 0,
+			'allow_null'        => $can_null,
+			'ui'                => 0,
+			'ajax'              => 0,
+			'placeholder'       => '',
+		);
+
+		$options->attach_field( $field_array );
+	}
+
+	/**
+	 * Start repeater field.
+	 * After adding the fields, call end_repeater_field.
+	 *
+	 * @param string $field_label  The name of the field.
+	 * @param string $field_slug   The slug of the field.
+	 * @param string $layout       The layout of the field. *Row*, table, or block.
+	 * @param string $button_label The label for the "Add" button.
+	 * @param int    $width        The width of the field.
+	 *
+	 * @return void
+	 */
+	public static function start_repeater_field(
+		$field_label,
+		$field_slug,
+		$layout = 'row',
+		$button_label = 'Add Row',
+		$width = 100
+	) {
+		$options               = self::get_instance();
+		$field_slug            = $options->string_to_slug( $field_slug );
+		$options->repeater_key = 'key_' . $field_slug;
+		$options->repeater     = array(
+			'key'               => 'key_' . $field_slug,
+			'label'             => $field_label,
+			'name'              => $field_slug,
+			'aria-label'        => '',
+			'type'              => 'repeater',
+			'instructions'      => '',
+			'required'          => 0,
+			'conditional_logic' => 0,
+			'wrapper'           => array(
+				'width' => $width,
+				'class' => '',
+				'id'    => '',
+			),
+			'layout'            => $layout,
+			'pagination'        => 0,
+			'min'               => 0,
+			'max'               => 0,
+			'collapsed'         => '',
+			'button_label'      => $button_label,
+			'rows_per_page'     => 20,
+			'sub_fields'        => array(),
+		);
+	}
+
+	/**
+	 * End repeater field.
+	 * Used to add a completed repeater field to the group data.
+	 *
+	 * @return void
+	 */
+	public static function end_repeater_field() {
+		$options               = self::get_instance();
+		$options->group_data[] = $options->repeater;
+		unset( $options->repeater_key );
+		unset( $options->repeater );
 	}
 
 	// Public static functions.

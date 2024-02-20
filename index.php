@@ -1,8 +1,11 @@
 <?php
 /**
  * Plugin Name: Josh's control panel
- *
  * Shared control panel for JWR plugins.
+ * Version: 0.5.1
+ * Author: Josh Robbs
+ * Author URI: https://joshrobbs.com
+ * Plugin URI: https://github.com/jwrobbs/jwr-control-panel
  *
  * @author Josh Robbs <josh@joshrobbs.com>
  * @package JWR_control_panel
